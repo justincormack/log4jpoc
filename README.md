@@ -1,9 +1,9 @@
-# Apache log4j poc
+# Apache Log4j cve example repo and docker images
 
-This repository holds code to reproduce the log4j cve
+This repository holds code to reproduce the [Log4j cve](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228) 
 
-You need to run a docker image that will safely fetch and run the vulnerable code
-
+## Reproduce the vulnerability
+You need to run a docker image that will safely fetch and run the vulnerable code without you having to install java or any java dependencies
 ```
 ❯ make run
 docker build -t log4jcve .
@@ -27,8 +27,11 @@ docker run -ti log4jcve
 17:22:20.369 [main] ERROR MyExample - if you can read this this code is vulnerable
 ```
 The code above is using log4j `2.14.1` which is vulnerable.
-With this repo you can play with workarounds, notably by moving to `2.15.0-rc2` of log4j, you can do this in the [pom.xml](pom.xml) or you can experiment with the `LOG4J_FORMAT_MSG_NO_LOOKUPS=true` environment variable that you can test in the included [Dockerfile](Dockerfile)
 
+There is an image justinjustin/poc that you can get from Docker Hub which holds the code of this repository.
+
+## Working around the vulnerability
+With this repo you can play with possible workarounds and fixes, notably by moving to `2.15.0-rc2` of log4j, you can do this in the [pom.xml](pom.xml#L18) or you can experiment with the `LOG4J_FORMAT_MSG_NO_LOOKUPS=true` environment variable that you can test in the included [Dockerfile](Dockerfile#L8)
 
 Code modified from Packet Storm
 https://packetstormsecurity.com/files/download/165225/apache-log4j-poc-main.zip
