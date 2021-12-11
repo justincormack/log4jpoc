@@ -1,3 +1,11 @@
+# Apache log4j poc
+
+Code modified from Packet Storm
+
+https://packetstormsecurity.com/files/download/165225/apache-log4j-poc-main.zip
+
+
+
 # Apache-Log4j
 Apache Log4j 远程代码执行
 
