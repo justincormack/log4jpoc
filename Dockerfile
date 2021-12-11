@@ -1,8 +1,9 @@
 FROM maven:3.8.4-jdk-8
+
 COPY . /usr/src/poc
 WORKDIR /usr/src/poc
 RUN mvn clean && mvn package
-RUN ls /usr/src/poc/target/
+
 # set this to disable the exploit
 #ENV LOG4J_FORMAT_MSG_NO_LOOKUPS=true
 ENV SECRET_VALUE='if you can read this this code is vulnerable'
