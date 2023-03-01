@@ -26,6 +26,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Login to Quay
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
       - name: Build and push
         uses: docker/build-push-action@v4
         
@@ -33,8 +40,6 @@ jobs:
           context: .
           push: true
           tags: ${{ env.CONTAINER_IMAGE }}
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
 
   upload-sbom:
     runs-on: ubuntu-latest
