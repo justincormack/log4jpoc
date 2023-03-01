@@ -1,0 +1,64 @@
+name: EdgeBit
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  CONTAINER_IMAGE: log4jpoc:2.14.1
+
+jobs:
+  
+  build-container:
+    runs-on: ubuntu-latest
+    outputs:
+      container_image: ${{ env.CONTAINER_IMAGE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        
+        with:
+          context: .
+          tags: ${{ env.CONTAINER_IMAGE }}
+
+  upload-sbom:
+    runs-on: ubuntu-latest
+
+    # ensure the SBOM is genearted after your container is built
+    needs: build-container
+
+    # to prevent duplication on a push & PR in quick succession: 
+    if: (github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000') || github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          # generate for the container built above
+          image: ${{ env.CONTAINER_IMAGE }}
+          artifact-name: sbom.syft.json
+          output-file: /tmp/sbom.syft.json
+          format: syft-json
+
+      - name: Upload SBOM to EdgeBit
+        uses: edgebitio/edgebit-build@main
+        with:
+          edgebit-url: https://rob.edgebit.io
+          token: ${{ secrets.EDGEBIT_ACCESS_TOKEN }}
+          labels: 'vuln=shellshock'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sbom-file: /tmp/sbom.syft.json
