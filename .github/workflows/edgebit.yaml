@@ -31,7 +31,10 @@ jobs:
         
         with:
           context: .
+          push: true
           tags: ${{ env.CONTAINER_IMAGE }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
 
   upload-sbom:
     runs-on: ubuntu-latest
