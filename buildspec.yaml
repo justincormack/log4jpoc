@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE: 'quay.io/robszumski/log4jpoc:2.14.1'
+    NAME: 'log4jpoc'
+    EDGEBIT_URL: 'https://rob.edgebit.io'
+  secrets-manager:
+    EDGEBIT_API_KEY: rob.edgebit.io/EdgeBitAPIKey
+
+phases:
+  install:
+    commands:
+      - echo "Installing jq"
+      - sudo yum install jq -y
+      - echo "Installing ebctl v0.5.0"
+      - curl -sL $(curl -s https://api.github.com/repos/edgebitio/edgebit-cli/releases/tags/v0.5.0 | jq -r '.assets[] | select(.name|match("^edgebit-cli_Linux_x86_64(.*)tar.gz$")) | .browser_download_url') --output ebctl.tar.gz
+      - tar -xvf ebctl.tar.gz
+      - chmod +x ebctl
+      - echo "Installing syft v0.74.1"
+      - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b . v0.74.1
+  pre_build:
+    commands:
+      - LATEST_SHA=$(git rev-parse HEAD)
+      - BASE_BRANCH='main'
+      - BASE_SHA=$(git merge-base --fork-point $BASE_BRANCH)
+  build:
+    commands:
+      - docker build -t $IMAGE .
+  post_build:
+    commands:
+      - ./syft packages $IMAGE -o syft > $NAME.syft
+      - ./ebctl upload-sbom --repo https://github.com/robszumski/log4jpoc --commit $LATEST_SHA --image-tag $IMAGE $NAME.syft
