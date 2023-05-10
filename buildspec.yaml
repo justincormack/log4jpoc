@@ -11,8 +11,6 @@ env:
 phases:
   install:
     commands:
-      - echo "Installing jq"
-      - sudo yum install jq -y
       - echo "Installing ebctl v0.5.0"
       - curl -sL $(curl -s https://api.github.com/repos/edgebitio/edgebit-cli/releases/tags/v0.5.0 | jq -r '.assets[] | select(.name|match("^edgebit-cli_Linux_x86_64(.*)tar.gz$")) | .browser_download_url') --output ebctl.tar.gz
       - tar -xvf ebctl.tar.gz
@@ -27,7 +25,6 @@ phases:
   build:
     commands:
       - docker build -t $IMAGE .
-  post_build:
-    commands:
       - ./syft packages $IMAGE -o syft > $NAME.syft
       - ./ebctl upload-sbom --component log4jpoc-codebuild --tag latest --repo https://github.com/robszumski/log4jpoc --commit $LATEST_SHA --image-tag $IMAGE $NAME.syft
+
