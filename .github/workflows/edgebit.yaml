@@ -67,8 +67,7 @@ jobs:
         with:
           edgebit-url: https://rob.edgebit.io
           token: ${{ secrets.EDGEBIT_ACCESS_TOKEN }}
-          labels: 'vuln=shellshock'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           sbom-file: /tmp/sbom.syft.json
           component: log4jpoc-github
-          tags: ${{ github.ref == 'refs/heads/main' && 'latest' }}
+          tags: ${{ github.ref == 'refs/heads/main' && 'latest' }}, '2.14.1'
