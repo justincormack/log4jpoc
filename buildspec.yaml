@@ -26,5 +26,5 @@ phases:
     commands:
       - docker build -t $IMAGE .
       - ./syft packages $IMAGE -o syft > $NAME.syft
-      - ./ebctl upload-sbom --component log4jpoc-codebuild --tag latest --repo https://github.com/robszumski/log4jpoc --commit $LATEST_SHA --image-tag $IMAGE $NAME.syft
+      - ./ebctl upload-sbom --component log4jpoc-codebuild --tag latest -tag 2.14.1 --repo https://github.com/robszumski/log4jpoc --commit $LATEST_SHA --image-tag $IMAGE $NAME.syft
 
