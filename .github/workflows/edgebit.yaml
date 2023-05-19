@@ -70,4 +70,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           sbom-file: /tmp/sbom.syft.json
           component: log4jpoc-github
-          tags: ${{ github.ref == 'refs/heads/main' && 'latest' }}, '2.14.1'
+          tags: ${{ github.ref == 'refs/heads/main' && 'latest' }}, 2.14.1
