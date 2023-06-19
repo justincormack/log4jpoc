@@ -2,11 +2,14 @@ version: 0.2
 
 env:
   variables:
-    IMAGE: 'quay.io/robszumski/log4jpoc:2.14.1'
+    IMAGE_TAG: '2.17.1'
+    IMAGE: "quay.io/robszumski/log4jpoc:$IMAGE_TAG"
     NAME: 'log4jpoc'
     EDGEBIT_URL: 'https://rob.edgebit.io'
+    GH_REPO: 'https://github.com/robszumski/log4jpoc'
   secrets-manager:
     EDGEBIT_API_KEY: rob.edgebit.io/EdgeBitAPIKey
+    GH_TOKEN: robszumski/GitHub/AccessToken
 
 phases:
   install:
@@ -17,14 +20,21 @@ phases:
       - chmod +x ebctl
       - echo "Installing syft v0.74.1"
       - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b . v0.74.1
+      - echo "Installing gh CLI"
+      - sudo dnf install gh
   pre_build:
     commands:
       - LATEST_SHA=$(git rev-parse HEAD)
       - BASE_BRANCH='main'
       - BASE_SHA=$(git merge-base --fork-point $BASE_BRANCH)
+      - GH_PR_NUMBER=$(gh pr list --repo $GH_REPO --search $LATEST_SHA --json number --jq .[].number)
   build:
     commands:
       - docker build -t $IMAGE .
       - ./syft packages $IMAGE -o syft > $NAME.syft
-      - ./ebctl upload-sbom --component log4jpoc-codebuild --tag latest -tag 2.14.1 --repo https://github.com/robszumski/log4jpoc --commit $LATEST_SHA --image-tag $IMAGE $NAME.syft
+      - ./ebctl upload-sbom-for-ci --component log4jpoc-codebuild --tag latest -tag $IMAGE_TAG --repo $GH_REPO --commit $LATEST_SHA --image-tag $IMAGE $NAME.syft > ./edgebit-comment-body.json
+      - |
+          if [ $(cat ./edgebit-comment-body.json | jq -r .skip_comment) ] ; then
+            gh pr comment $GH_PR_NUMBER --repo $GH_REPO --body $(cat ./edgebit-comment-body.json | jq -r .comment_body)
+          fi
 
